@@ -32,7 +32,49 @@ function homers_lunch_break() {
     $n = (int)readline('Enter N: ');
     $m = (int)readline('Enter M: ');
 
-    echo intdiv($t, min($n, $m));
+    $min = min($n, $m);
+    $max = max($n, $m);
+
+    $min_count = intdiv($t, $min);
+    $max_count = 0;
+
+    $remainder = $t % $min;
+
+    if ($remainder == 0) {
+        echo $t . ' = ' . $min . ' * ' . $min_count . ' + ' . $max . ' * ' . $max_count . ' + '. $remainder . '(remainder)';
+        return;
+    }
+
+    $temp_min_count = $min_count;
+    $temp_remainder = $remainder;
+    do {
+        $temp_remainder += $min;
+        
+        $temp_min_count--;
+    } while (($temp_remainder % $max != 0) && ($temp_remainder < $t));
+
+    $temp_max_count = intdiv($t, $max); 
+    if (($temp_remainder >= $t) && ($min_count == $temp_max_count)) {
+        $min_count = 0;
+        $max_count = $temp_max_count;
+
+        $remainder = $t % $max;
+
+        echo $t . ' = ' . $min . ' * ' . $min_count . ' + ' . $max . ' * ' . $max_count . ' + '. $remainder . '(remainder)';
+        return;
+    }
+
+    if ($temp_remainder >= $t) {
+        echo $t . ' = ' . $min . ' * ' . $min_count . ' + ' . $max . ' * ' . $max_count . ' + '. $remainder . '(remainder)';
+        return;
+    }
+    
+    $min_count = $temp_min_count;
+    $max_count = intdiv($temp_remainder, $max);
+
+    $remainder = 0;
+
+    echo $t . ' = ' . $min . ' * ' . $min_count . ' + ' . $max . ' * ' . $max_count . ' + '. $remainder . '(remainder)';
 }
 
 // Тесты

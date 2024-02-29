@@ -12,20 +12,24 @@ JOIN Class
 
 -- ##Задача 2
 
-DELETE 
+WITH count_table AS (
+    SELECT 
+        company, COUNT(id) AS trip_count 
+    FROM Trip 
+    GROUP BY company
+),
+min_trips AS (
+    SELECT 
+        MIN(trip_count) AS min_trip_count
+    FROM count_table
+)
+DELETE
 FROM Company 
 WHERE Company.id IN (
-    SELECT company 
-    FROM Trip 
-    GROUP BY company 
-    HAVING COUNT(id) = (
-        SELECT MIN(trip_count) 
-        FROM (
-            SELECT COUNT(id) AS trip_count 
-            FROM Trip 
-            GROUP BY company
-        ) AS count_table
-    )
+    SELECT company
+    FROM count_table
+    JOIN min_trips
+        ON count_table.trip_count = min_trips.min_trip_count
 );
 
 
