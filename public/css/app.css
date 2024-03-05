@@ -19,11 +19,24 @@ nav {
   gap: 24px;
 }
 
-nav > a {
+a {
   color: black;
 }
 
+.active {
+  color: purple;
+}
+
 .container {
+  display: flex;
+  flex-direction: column;
+  height: 512px;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+}
+
+#container > div {
   display: flex;
   flex-direction: column;
   height: 512px;
