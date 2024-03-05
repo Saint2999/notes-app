@@ -1,19 +1,13 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\NotesController;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
-*/
+Route::get('/notes', [NotesController::class, 'getNoteLinks'])->name('notes.get_links');
+Route::get('/notes/{slug}', [NotesController::class, 'getNote'])->name('notes.get_note');
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+Route::patch('/notes/{slug}', [NotesController::class, 'confirmReading'])->name('notes.confirm_reading');
+
+Route::post('/notes/create', [NotesController::class, 'createNote'])->name('notes.create_note');
+
+Route::delete('/notes/{slug}', [NotesController::class, 'deleteNote'])->name('notes.delete_note');

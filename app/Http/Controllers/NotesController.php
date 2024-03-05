@@ -2,74 +2,93 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Responses\ApiSuccessResponse;
+use App\Services\NotesService;
+use App\DTOs\NoteDTO;
+use Illuminate\Http\Response;
 use Illuminate\Http\Request;
-use App\Http\Requests\NotesCreateRequest;
-use App\Interfaces\NotesRepositoryInterface;
 
-class NotesController extends Controller {
+class NotesController extends Controller 
+{
+    private NotesService $service;
 
-    private NotesRepositoryInterface $repository;
-
-    public function __construct(NotesRepositoryInterface $repository) {
-        $this->repository = $repository;
+    public function __construct(NotesService $service) 
+    {
+        $this->service = $service;
     }
     
-    public function index() {
+    public function index() 
+    {
         return redirect()->route('notes.show_creation');
     }
 
-    public function showNoteCreation() {
+    public function showNoteCreation()
+    {
         return view('notes.creation');
     }
 
-    public function showNoteLinks() {
-        $notes = $this->repository->getAllNotesWithPagination(5);
-
-        return view('notes.links')->with('notes', $notes);
+    public function showNoteLinks() 
+    {
+        return view('notes.links');
     }
 
-    public function showNote($slug, Request $request) {
-        $note = $this->repository->getNoteBySlug($slug);
-
-        if ($note == null) {
-            return view('notes.note')->with('error', 'Note does not exist');
-        }
-
-        if ($request->confirmed == 0) {
-            return view('notes.note')->with('slug', $slug);
-        }
-
-        if ($note->readings_left < 1) {
-            $this->repository->deleteNote($slug);
-        }
-
-        return view('notes.note')->with('note', $note);
+    public function showNote(string $slug) 
+    {
+        return view('notes.note')->with('slug', $slug);
     }
 
-    public function confirmReading($slug) {
-        $note = $this->repository->getNoteBySlug($slug);
+    public function getNoteLinks()
+    {
+        $notes = $this->service->getAllNotes();
 
-        $note->readings_left -= 1;
-
-        $this->repository->updateNote($slug, ['readings_left' => $note->readings_left]);
-
-        return redirect()->route('notes.show_note', ['slug' => $slug, 'confirmed'=> 1]);
+        return new ApiSuccessResponse(
+            $notes,
+            ['self' => url()->current()]
+        );
     }
 
-    public function deleteNote($slug) {
-        $this->repository->deleteNote($slug);
+    public function getNote(string $slug, Request $request) 
+    {
+        $note = $this->service->getNote($slug);
 
-        return redirect()->route('notes.show_links');
+        return new ApiSuccessResponse(
+            $note,
+            ['self' => url()->current()]
+        );
     }
 
-    public function createNote(NotesCreateRequest $request) {
-        $details = $request->only([
-            'text',
-            'readings_left'
-        ]);
+    public function confirmReading(string $slug) 
+    {
+        $this->service->confirmReading($slug);
 
-        $this->repository->createNote($details);
+        return new ApiSuccessResponse(
+            [],
+            [],
+            Response::HTTP_NO_CONTENT
+        );
+    }
 
-        return redirect()->route('notes.show_links');
+    public function createNote(Request $request) 
+    {
+        $noteDTO = NoteDTO::fromRequest($request);
+
+        $noteDTO = $this->service->createNote($noteDTO);
+
+        return new ApiSuccessResponse(
+            $noteDTO,
+            ['self' => url()->current()],
+            Response::HTTP_CREATED
+        );
+    }
+    
+    public function deleteNote(string $slug) 
+    {
+        $this->service->deleteNote($slug);
+
+        return new ApiSuccessResponse(
+            [],
+            [],
+            Response::HTTP_NO_CONTENT
+        );
     }
 }
