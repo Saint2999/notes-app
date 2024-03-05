@@ -10,7 +10,7 @@ class ApiErrorResponse implements Responsable
     public function __construct(
         private mixed $errors,
         private int $statusCode = Response::HTTP_INTERNAL_SERVER_ERROR,
-        private array $headers = ['Content-Type => application/json'],
+        private array $headers = [],
     ) {
     }
 

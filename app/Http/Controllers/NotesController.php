@@ -47,7 +47,7 @@ class NotesController extends Controller
         );
     }
 
-    public function getNote(string $slug, Request $request) 
+    public function getNote(string $slug) 
     {
         $note = $this->service->getNote($slug);
 
